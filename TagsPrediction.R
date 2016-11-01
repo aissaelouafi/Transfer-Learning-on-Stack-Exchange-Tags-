@@ -5,6 +5,7 @@ library(ggplot2)
 library(plotly)
 library(stringr)
 library(plotly)
+library(tm)
 
 #Remove all from memory
 rm(list=ls())
@@ -44,11 +45,23 @@ countDistinctTags <- function(df,nFreq){
   colnames(df) <- c("tags","Freq")
   df <- df[order(df$Freq,decreasing = TRUE),]
   df <- df[1:nFreq,]
-  return(df)
+  p <- plot_ly(x = df$tags, y = df$Freq,type="bar") %>%
+    layout(yaxis = list(title = "Freq"),xaxis = list(title = "Tags"))
+  return(p)
 }
 
+# Analyze the appareance probability of tags in the topic title
+# input : df the data frame to analyze
 
-
+titleTagsProbability <- function(df){
+  title_words <- sapply(str_split(df$title," "),'[',1:max(lengths(str_split(df$title," "))))
+  title_words <- t(title_words[,1:ncol(title_words)])
+  tag_words <- sapply(str_split(df$tags," "),'[',1:max(lengths(str_split(df$tags," "))))
+  tag_words <- t(tag_words[,1:ncol(tag_words)])
+  
+  tag_in_title <- tag_words %in% title_words
+  return(table(tag_in_title)["TRUE"] / length(tag_in_title))
+}
 
 ############################################################
 #                                                          #
@@ -56,20 +69,33 @@ countDistinctTags <- function(df,nFreq){
 #                                                          #
 ############################################################
 
-#Count tags frequency by topic
-travel_tags <- countDistinctTags(travel,50)
-biology_tags <- countDistinctTags(biology,50)
+#Count tags frequency by topic and vizualise the bar chart of most frequent tags
+travel_tags_chart <- countDistinctTags(travel,50)
+biology_tags_chart <- countDistinctTags(biology,50)
+cooking_tags_chart <- countDistinctTags(cooking,10)
 
-#Data vizualisation
-p <- plot_ly(x = biology_tags$tags, y = biology_tags$Freq,type="bar") %>%
-  layout(yaxis = list(title = "Freq"),xaxis = list(title = "Tags"))
-p
+titleTagsProbability(cooking)
 
-#Lets analyze the probability that a tag is in title
-title_words <- sapply(str_split(travel$title," "),'[',1:max(lengths(str_split(travel$title," "))))
-title_words <- t(title_words[,1:ncol(title_words)])
-tag_words <- sapply(str_split(travel$tags," "),'[',1:max(lengths(str_split(travel$tags," "))))
-tag_words <- t(tag_words[,1:ncol(tag_words)])
+############################################################
+#                                                          #
+#                      NLP Analysis                        #  
+#                                                          #
+############################################################
 
-tag_in_title <- tag_words %in% title_words
-table(tag_in_title)["TRUE"] / length(tag_in_title)
+titles_corpus <- Corpus(VectorSource(travel$title))
+replacePunctuation <- content_transformer(function(x) {return (gsub("[[:punct:]]"," ", x))})
+titles_corpus <- tm_map(titles_corpus,replacePunctuation)
+titles_corpus <- tm_map(titles_corpus,removePunctuation)
+titles_corpus <- tm_map(titles_corpus,removeNumbers)
+titles_corpus <- tm_map(titles_corpus,tolower)
+titles_corpus <- tm_map(titles_corpus,removeWords,stopwords("english"))
+titles_corpus <- tm_map(titles_corpus, stripWhitespace) 
+titles_corpus <- tm_map(titles_corpus, PlainTextDocument) 
+dtm <- DocumentTermMatrix(titles_corpus)
+tfidf <- DocumentTermMatrix(titles_corpus, control = list(weighting = weightTfIdf))
+freq <- sort(colSums(as.matrix(dtm)),decreasing = TRUE)
+
+wf <- data.frame(word=names(freq), freq=freq)[1:30,]
+p <- plot_ly(x = wf$word, y = wf$freq,type="bar") %>%
+  layout(yaxis = list(title = "Freq"),xaxis = list(title = "Topic title"))
+
