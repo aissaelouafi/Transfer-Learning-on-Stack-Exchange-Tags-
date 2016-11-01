@@ -5,8 +5,6 @@ library(ggplot2)
 library(plotly)
 library(stringr)
 library(plotly)
-library(plyr)
-library(data.table)
 
 #Remove all from memory
 rm(list=ls())
@@ -25,8 +23,8 @@ test = read.csv("../test.csv")
 sample_submission = read.csv("../sample_submission.csv")
 
 #Copy data to spark environment 
-biology_sc <- as.data.frame(biology)
-scc <- copy_to(sc,biology_sc)
+#biology_sc <- as.data.frame(biology)
+#scc <- copy_to(sc,biology_sc)
 
 ############################################################
 #                                                          #
@@ -73,7 +71,5 @@ title_words <- t(title_words[,1:ncol(title_words)])
 tag_words <- sapply(str_split(travel$tags," "),'[',1:max(lengths(str_split(travel$tags," "))))
 tag_words <- t(tag_words[,1:ncol(tag_words)])
 
-tst <- merge(title_words,tag_words)
-
-
-
+tag_in_title <- tag_words %in% title_words
+table(tag_in_title)["TRUE"] / length(tag_in_title)
