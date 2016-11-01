@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1477961298194.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "D153C2EB",
+    "lastKnownWriteTime" : 4617364480,
+    "last_content_update" : 1477961298194,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "555C36EC",
+        "caption" : "by_travel_tags",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=by_travel_tags&cache_key=555C36EC",
+        "displayedObservations" : 19279,
+        "environment" : "",
+        "object" : "by_travel_tags",
+        "preview" : 0,
+        "totalObservations" : 19279,
+        "variables" : 2
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

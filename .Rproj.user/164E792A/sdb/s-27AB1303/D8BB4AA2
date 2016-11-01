@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#Import library\nlibrary(sparklyr)\nlibrary(dplyr)\nlibrary(ggplot2)\nlibrary(plotly)\nlibrary(stringr)\nlibrary(plotly)\n\n#Sparklyr connection\nsc <- spark_connect(master=\"local\")\n\n# Import Data\nbiology =  read.csv(\"../biology.csv\")\ntravel = read.csv(\"../travel.csv\")\nrobotic = read.csv(\"../robotics.csv\")\ncooking = read.csv(\"../cooking.csv\")\ncrypto = read.csv(\"../crypto.csv\")\ndiy = read.csv(\"../diy.csv\")\ntest = read.csv(\"../test.csv\")\nsample_submission = read.csv(\"../sample_submission.csv\")\n\n#Copy data to spark environment \nbiology_sc <- as.data.frame(biology)\nscc <- copy_to(sc,biology_sc)\n\n#Data vizualisation \n#Visualize the most frequent tags/artciles category \ntravel_tags <- str_split(travel$tags,\" \")\ntravel_tags_count <- unique(travel_tags)\n\n#The number of distinct tags by category \n#In this case we consider tag as multiple word\ntravel_tags <- travel %>% group_by(tags) %>% summarise(n_distinct(tags))\nbiology_tags <- biology %>% group_by(tags) %>% summarise(n_distinct(tags))\nrobotic_tags <- robotic %>% group_by(tags) %>% summarise(n_distinct(tags))\ncooking_tags <- cooking %>% group_by(tags) %>% summarise(n_distinct(tags))\ncrypto_tags <- crypto %>% group_by(tags) %>% summarise(n_distinct(tags))\ndiy_tags <- diy %>% group_by(tags) %>% summarise(n_distinct(tags))\n\nnrow(travel_tags)\nnrow(biology_tags)\nnrow(robotic_tags)\nnrow(cooking_tags)\nnrow(crypto_tags)\nnrow(diy_tags)\n\n#Considering tag as single word : \n#Lets count the tags frequency by topic\ntravel_tags <- as.data.frame(as.factor(unlist(str_split(travel_tags$tags,\" \"))))\ncolnames(travel_tags) <- c(\"tags\",\"Freq\")\ntravel_tags <- data.frame(table(travel_tags$tags))\n#Sort data by tags frequency \ntravel_tags <- travel_tags[order(travel_tags$Freq,decreasing = TRUE),]\ntravel_tags <- travel_tags[1:20,]\n\ncopy_to(sc,travel_tags)\n#Data vizualisation\np <- plot_ly(x = travel_tags$tags, y = travel_tags$Freq,type=\"bar\") %>%\n  layout(yaxis = list(title = \"Freq\"),xaxis = list(title = \"Tags\"))\n\n",
+    "created" : 1477762183984.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3968946723",
+    "id" : "D8BB4AA2",
+    "lastKnownWriteTime" : 1478018284,
+    "last_content_update" : 1478018284417,
+    "path" : "~/Desktop/MLProject/Tags Prediction/Tags Prediction/TagsPrediction.R",
+    "project_path" : "TagsPrediction.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "library(sparklyr)\nlibrary(dplyr)\nlibrary(DBI)\nlibrary(rsparkling)\nlibrary(h2o)\nlibrary(devtools)\nlibrary(nycflights13)\nlibrary(ggplot2)\n\nsc <- spark_connect(master = \"spark://localhost:7077\", version =\"1.6.0\",spark_home = \"/usr/local/Cellar/spark\")\niris_tbl <- copy_to(sc,iris,overwrite = TRUE)\nsrc_tbls(sc)\n\n# DBI SQL Query package\niris_preview <- dbGetQuery(sc,\"SELECT * FROM iris LIMIT 10\")\n\n#Spark MLlib machine learning\nmtcars_tbl <- copy_to(sc,mtcars)\n# transform data set to train and test data \npartitions <- mtcars_tbl %>% filter(hp >=100) %>% mutate(cyl = 8) %>% sdf_partition(training = 0.5, test = 0.5, seed = 1099)\npartitions_iris <- iris_tbl %>% filter(Petal_Length >= 1.5) %>% sdf_partition(train = 0.8, test = 0.2, seed = 1099)\n\n\n#Fit a linear model to the dataset using sparklyr\nfit <- partitions_iris$train %>% ml_linear_regression(response = \"Sepal_Length\", features = c(\"Sepal_Width\",\"Petal_Length\"))\n\n\n\n#Fit a linear model using rsparkling, h2o\npartitions <- h2o.splitFrame(as_h2o_frame(iris),0.5)\ntrain_h2o <- as_h2o_frame(partitions_iris$train)\ntest_h2o <- as_h2o_frame(partitions_iris$test)\n\n\n#Learn a bit more about the quality of the fir and the statistical significance of each of our predictors\nsummary(fit)\n\nflights_tbl <- copy_to(sc, nycflights13::flights, \"flights\")\n\ndelay <- flights_tbl %>% \n  group_by(tailnum) %>%\n  summarise(count = n(), dist = mean(distance), delay = mean(arr_delay)) %>%\n  filter(count > 20, dist < 2000, !is.na(delay)) %>%\n  collect()\n\n# plot delays\nlibrary(ggplot2)\nggplot(delay, aes(dist, delay)) +\n  geom_point(aes(size = count), alpha = 1/2) +\n  geom_smooth() +\n  scale_size_area(max_size = 2)\n",
+    "created" : 1477763569184.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2705343893",
+    "id" : "1A130683",
+    "lastKnownWriteTime" : 1477428180,
+    "last_content_update" : 1477428180,
+    "path" : "~/Desktop/MLProject/SparkLyrDemo/sparkDemo.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

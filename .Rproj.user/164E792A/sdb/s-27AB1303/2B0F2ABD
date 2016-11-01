@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1477763012180.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "2B0F2ABD",
+    "lastKnownWriteTime" : 0,
+    "last_content_update" : 1477763012180,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "DFDE21D5",
+        "caption" : "travel",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=travel&cache_key=DFDE21D5",
+        "displayedObservations" : "19279",
+        "environment" : "",
+        "object" : "travel",
+        "preview" : "0",
+        "totalObservations" : "19279",
+        "variables" : "4"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

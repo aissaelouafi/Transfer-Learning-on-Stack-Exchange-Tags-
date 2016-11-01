@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1478011597689.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "60D3C3F5",
+    "lastKnownWriteTime" : 4294967302,
+    "last_content_update" : 1478011597689,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "3F46C157",
+        "caption" : "diy_tags",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=diy_tags&cache_key=3F46C157",
+        "displayedObservations" : "12947",
+        "environment" : "",
+        "object" : "diy_tags",
+        "preview" : "0",
+        "totalObservations" : "12947",
+        "variables" : "2"
+    },
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

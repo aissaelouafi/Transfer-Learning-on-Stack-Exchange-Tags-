@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1477778507496.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "B3946247",
+    "lastKnownWriteTime" : 4294967302,
+    "last_content_update" : 1477778507496,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "685BC28D",
+        "caption" : "biology_sc",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=biology_sc&cache_key=685BC28D",
+        "displayedObservations" : 13196,
+        "environment" : "",
+        "object" : "biology_sc",
+        "preview" : 0,
+        "totalObservations" : 13196,
+        "variables" : 4
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
