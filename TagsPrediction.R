@@ -6,6 +6,9 @@ library(plotly)
 library(stringr)
 library(plotly)
 
+#Remove all from memory
+rm(list=ls())
+
 #Sparklyr connection
 sc <- spark_connect(master="local")
 
@@ -30,6 +33,19 @@ scc <- copy_to(sc,biology_sc)
 ############################################################
 
 
+# Count most frequent tags by topic 
+# input : dataframe
+# nFreq : minimal frequency of tags
+
+countDistinctTags <- function(df,nFreq){
+  df <- as.data.frame(as.factor(unlist(str_split(df$tags," "))))
+  colnames(df) <- c("tags")
+  df <- data.frame(table(df$tags))
+  colnames(df) <- c("tags","Freq")
+  df <- df[order(df$Freq,decreasing = TRUE),]
+  df <- df[1:nFreq,]
+  return(df)
+}
 
 
 
@@ -41,18 +57,10 @@ scc <- copy_to(sc,biology_sc)
 ############################################################
 
 #Count tags frequency by topic
-travel_tags <- as.data.frame(as.factor(unlist(str_split(travel$tags," "))))
-colnames(travel_tags) <- c("tags")
-travel_tags <- data.frame(table(travel_tags$tags))
-colnames(travel_tags) <- c("tags","Freq")
-
-#Sort data by tags frequency 
-travel_tags <- travel_tags[order(travel_tags$Freq,decreasing = TRUE),]
-
-#Get the 20 most frequent tags 
-travel_tags <- travel_tags[1:20,]
+travel_tags <- countDistinctTags(travel,50)
+biology_tags <- countDistinctTags(biology,50)
 
 #Data vizualisation
-p <- plot_ly(x = travel_tags$tags, y = travel_tags$Freq,type="bar") %>%
+p <- plot_ly(x = biology_tags$tags, y = biology_tags$Freq,type="bar") %>%
   layout(yaxis = list(title = "Freq"),xaxis = list(title = "Tags"))
-
+p
