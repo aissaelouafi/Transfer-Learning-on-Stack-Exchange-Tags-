@@ -5,6 +5,8 @@ library(ggplot2)
 library(plotly)
 library(stringr)
 library(plotly)
+library(plyr)
+library(data.table)
 
 #Remove all from memory
 rm(list=ls())
@@ -64,3 +66,14 @@ biology_tags <- countDistinctTags(biology,50)
 p <- plot_ly(x = biology_tags$tags, y = biology_tags$Freq,type="bar") %>%
   layout(yaxis = list(title = "Freq"),xaxis = list(title = "Tags"))
 p
+
+#Lets analyze the probability that a tag is in title
+title_words <- sapply(str_split(travel$title," "),'[',1:max(lengths(str_split(travel$title," "))))
+title_words <- t(title_words[,1:ncol(title_words)])
+tag_words <- sapply(str_split(travel$tags," "),'[',1:max(lengths(str_split(travel$tags," "))))
+tag_words <- t(tag_words[,1:ncol(tag_words)])
+
+tst <- merge(title_words,tag_words)
+
+
+
