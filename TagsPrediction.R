@@ -6,6 +6,9 @@ library(plotly)
 library(stringr)
 library(plotly)
 library(tm)
+library(wordcloud)
+library(e1071) #Naive bayes classifier 
+library(stats)
 
 #Remove all from memory
 rm(list=ls())
@@ -82,6 +85,7 @@ titleTagsProbability(cooking)
 #                                                          #
 ############################################################
 
+# Topic titles corpus prepocessing
 titles_corpus <- Corpus(VectorSource(travel$title))
 replacePunctuation <- content_transformer(function(x) {return (gsub("[[:punct:]]"," ", x))})
 titles_corpus <- tm_map(titles_corpus,replacePunctuation)
@@ -91,11 +95,29 @@ titles_corpus <- tm_map(titles_corpus,tolower)
 titles_corpus <- tm_map(titles_corpus,removeWords,stopwords("english"))
 titles_corpus <- tm_map(titles_corpus, stripWhitespace) 
 titles_corpus <- tm_map(titles_corpus, PlainTextDocument) 
+
+# Create the document-term matrix and the tf-idf matrix
 dtm <- DocumentTermMatrix(titles_corpus)
 tfidf <- DocumentTermMatrix(titles_corpus, control = list(weighting = weightTfIdf))
 freq <- sort(colSums(as.matrix(dtm)),decreasing = TRUE)
 
+# Plot the most frequent word in topic titles
 wf <- data.frame(word=names(freq), freq=freq)[1:30,]
 p <- plot_ly(x = wf$word, y = wf$freq,type="bar") %>%
   layout(yaxis = list(title = "Freq"),xaxis = list(title = "Topic title"))
 
+#Word cloud of topic titles & Word cloud of topic tags
+wordcloud(names(freq),freq,min.freq = 250)
+
+#Convert the tfidf matrix to dataframe
+tfidf <- as.data.frame(as.matrix(tfidf))
+
+#Analyze a small part from the tfidf matrix for test
+tfidf_small <- tfidf[1:100,]
+rownames(tfidf_small) <- 1:nrow(tfidf_small)
+
+#Dimensionality reduction : PCA Analysis 
+log.tfidf <- log(tfidf)
+
+#Build the naive bayes classifier 
+model <- naiveBayes(as.matrix(tfidf),as.factor(travel$tags))
