@@ -9,7 +9,8 @@ library(tm)
 library(wordcloud)
 library(e1071) #Naive bayes classifier 
 library(stats)
-library(factoextra)
+library(factoextra) # PCA 
+library(slam)
 
 #Get dev sparlyr version
 devtools::install_github("rstudio/sparklyr")
@@ -87,8 +88,13 @@ generateCorpus <- function(df){
   corpus <- tm_map(corpus,removeWords,stopwords("english"))
   corpus <- tm_map(corpus, stripWhitespace) 
   corpus <- tm_map(corpus, PlainTextDocument)
+  #options(mc.cores=1)
+  #TrigramTokenizer <- function(x) NGramTokenizer(x, 
+  #                                               Weka_control(min = 2, max = 2))
+  #tdm <- TermDocumentMatrix(corpus, control = list(tokenize = TrigramTokenizer))
   return(corpus)
 }
+
 ############################################################
 #                                                          #
 #                   DATA VIZUALISATION                     #  
@@ -109,8 +115,8 @@ titleTagsProbability(cooking)
 ############################################################
 
 # Topic titles corpus prepocessing
-titles_corpus <- generateCorpus(travel$title)
-title_corpus_test <- generateCorpus(travel_test$title)
+titles_corpus <- generateCorpus(biology$content)
+title_corpus_test <- generateCorpus(test$content)
 tfidf_test <- DocumentTermMatrix(title_corpus_test, control = list(weighting = weightTfIdf))
 
 # Create the document-term matrix and the tf-idf matrix for both train and test data 
@@ -192,11 +198,12 @@ text(var_cordinates, labels=rownames(var_cordinates), cex = 1, adj=1)
 fviz_pca_var(tfidf.pca)
 
 #Build the naive bayes classifier 
-model <- naiveBayes(as.matrix(tfidf),as.factor(travel$tags))
-
+model <- naiveBayes(as.matrix(tfidf),as.factor(biology$tags))
+tfidf_test <- rollup(tfidf_test, 2, na.rm=TRUE, FUN = sum)
 prediction <- predict(model,as.matrix(tfidf_test))
 colnames(prediction) <- c("tags")
 prediction <- as.data.frame(prediction)
+
 
 #Show the most frequent predicted tags 
 frequent_predicted_tags <- as.data.frame(table(prediction))
@@ -204,3 +211,5 @@ frequent_predicted_tags <- frequent_predicted_tags[order(frequent_predicted_tags
 frequent_predicted_tags <- frequent_predicted_tags[1:10,]
 p <- plot_ly(x = frequent_predicted_tags$prediction, y = frequent_predicted_tags$Freq,type="bar") %>%
   layout(yaxis = list(title = "Freq"),xaxis = list(title = "Tags"))
+
+#Evaluate the model 
