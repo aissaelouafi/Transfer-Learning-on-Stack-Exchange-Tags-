@@ -26,11 +26,11 @@ biology =  read.csv("../biology.csv")
 travel = read.csv("../travel.csv",nrows=1000) # Get only first 1000 rows to construct the model for memory issues
 travel_test = read.csv("../travel.csv",nrows = 1000 ,skip= 18279) #Predict on last 1000 rows of travel
 colnames(travel_test) <- colnames(travel)
-robotic = read.csv("../robotics.csv")
-cooking = read.csv("../cooking.csv")
-crypto = read.csv("../crypto.csv")
-diy = read.csv("../diy.csv")
-test = read.csv("../test.csv")
+robotic = read.csv("../robotics.csv",nrows=1000)
+cooking = read.csv("../cooking.csv",nrows = 1000)
+crypto = read.csv("../crypto.csv",nrows = 1000)
+diy = read.csv("../diy.csv",nrows = 1000)
+test = read.csv("../test.csv",nrows = 1000)
 sample_submission = read.csv("../sample_submission.csv")
 
 #Copy data to spark environment 
