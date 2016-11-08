@@ -23,7 +23,7 @@ sc <- spark_connect(master="local")
 
 # Import Data
 biology =  read.csv("../biology.csv")
-travel = read.csv("../travel.csv",nrows=1000) # Get only first 1000 rows to construct the model for memory issues
+travel = read.csv("../travel.csv",nrows=10) # Get only first 1000 rows to construct the model for memory issues
 travel_test = read.csv("../travel.csv",nrows = 1000 ,skip= 18279) #Predict on last 1000 rows of travel
 colnames(travel_test) <- colnames(travel)
 robotic = read.csv("../robotics.csv",nrows=1000)
@@ -35,7 +35,7 @@ sample_submission = read.csv("../sample_submission.csv")
 
 #Copy data to spark environment 
 #biology_sc <- as.data.frame(biology)
-cc <- copy_to(sc,travel)
+cc <- copy_to(sc,travel,"travel",overwrite=TRUE)
 
 ############################################################
 #                                                          #
@@ -62,13 +62,12 @@ countDistinctTags <- function(df,nFreq){
 
 # Analyze the appareance probability of tags in the topic title
 # input : df the data frame to analyze
-
+# TODO : calculate the correlation between every tags (if I have a tag which the second tags the most correlated tag with this one)
 titleTagsProbability <- function(df){
   title_words <- sapply(str_split(df$title," "),'[',1:max(lengths(str_split(df$title," "))))
   title_words <- t(title_words[,1:ncol(title_words)])
   tag_words <- sapply(str_split(df$tags," "),'[',1:max(lengths(str_split(df$tags," "))))
   tag_words <- t(tag_words[,1:ncol(tag_words)])
-  
   tag_in_title <- tag_words %in% title_words
   return(table(tag_in_title)["TRUE"] / length(tag_in_title))
 }
