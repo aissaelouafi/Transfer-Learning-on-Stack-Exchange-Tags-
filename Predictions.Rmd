@@ -167,14 +167,18 @@ travel_dtm
 
 We will apply the LDA using Gibbs sampling ... 
 ```{r}
-ldaOut <-LDA(travel_dtm,5, method="Gibbs")
+ldaOut <-LDA(travel_dtm,9, method="Gibbs")
 ldaOut.topics <- as.data.frame(topics(ldaOut))
+
 #Topic of every document in our Document Term Matrix
 rownames(ldaOut.topics) <- 1:nrow(ldaOut.topics)
 ldaOut.topics
 
+#Get top term in every topic
+ldaOut.terms <- as.data.frame(terms(ldaOut,15))
+ldaOut.terms
 
-
+topicProbabilities <- as.data.frame(ldaOut@gamma)
 ```
 
 ##### Generate TfIdf matrix
