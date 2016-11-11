@@ -23,6 +23,8 @@ library(wordcloud)
 library(e1071) #Naive bayes classifier 
 library(stats)
 library(factoextra) # PCA 
+library(topicmodels)
+library(LDAvis)
 ```
 
 #### Import data 
@@ -31,7 +33,7 @@ library(factoextra) # PCA
 For memory issue (laptop with only 4Gb of RAM) I will analyze only first 1000 observations of each topic, it's about only <b>~10%</b> of real data ! Kaggle provide also a test dataset with 81926 observations talking about physics. Each dataframe contains 4 colmuns (id, title, content and tags column for the train data).
 ```{r}
 biology =  read.csv("../biology.csv",nrows =1000)
-travel = read.csv("../travel.csv",nrows=1000) 
+travel = read.csv("../travel.csv",nrows=2000) 
 robotic = read.csv("../robotics.csv",nrows=1000)
 cooking = read.csv("../cooking.csv",nrows=1000)
 crypto = read.csv("../crypto.csv",nrows=1000)
@@ -158,8 +160,23 @@ We can see that we have many common word between the word title cloud word and t
 Describe LDA and the main goal of this approach (define topic and word distribution ! )
 
 ```{r}
+travel_corpus <- generateCorpus(travel$content)
+travel_dtm <- DocumentTermMatrix(travel_corpus)
+travel_dtm
+```
+
+We will apply the LDA using Gibbs sampling ... 
+```{r}
+ldaOut <-LDA(travel_dtm,5, method="Gibbs")
+ldaOut.topics <- as.data.frame(topics(ldaOut))
+#Topic of every document in our Document Term Matrix
+rownames(ldaOut.topics) <- 1:nrow(ldaOut.topics)
+ldaOut.topics
+
+
 
 ```
+
 ##### Generate TfIdf matrix
 
 We will now generate the **tfidf** matrix to reflect how important a word is to a document in the corpus. The **tfidf** is defined as the product of two statistics, term frequency and inverse document frequency.

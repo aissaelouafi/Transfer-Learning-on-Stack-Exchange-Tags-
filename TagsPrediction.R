@@ -4,13 +4,14 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(stringr)
-library(plotly)
 library(tm)
 library(wordcloud)
 library(e1071) #Naive bayes classifier 
 library(stats)
 library(factoextra) # PCA 
 library(slam)
+library(topicmodels)
+library(LDAvis)
 
 #Get dev sparlyr version
 devtools::install_github("rstudio/sparklyr")
