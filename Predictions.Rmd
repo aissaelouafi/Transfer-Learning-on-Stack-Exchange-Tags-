@@ -25,6 +25,7 @@ library(stats)
 library(factoextra) # PCA 
 library(topicmodels)
 library(LDAvis)
+library(devtools)
 ```
 
 #### Import data 
@@ -38,7 +39,7 @@ robotic = read.csv("../robotics.csv",nrows=1000)
 cooking = read.csv("../cooking.csv",nrows=1000)
 crypto = read.csv("../crypto.csv",nrows=1000)
 diy = read.csv("../diy.csv",nrows=1000)
-test = read.csv("../test.csv",nrows=1000)
+test = read.csv("../test.csv")
 sample_submission = read.csv("../sample_submission.csv",nrows=1000)
 ```
 #### Explore data
@@ -46,6 +47,7 @@ sample_submission = read.csv("../sample_submission.csv",nrows=1000)
 Lets explore the train dataset of multiple topics ! 
 
 ```{r}
+sc <- spark_connect(master="local")
 travel[1:5,]
 ```
 
@@ -167,20 +169,48 @@ travel_dtm
 
 We will apply the LDA using Gibbs sampling ... 
 ```{r}
-ldaOut <-LDA(travel_dtm,9, method="Gibbs")
-ldaOut.topics <- as.data.frame(topics(ldaOut))
-
-#Topic of every document in our Document Term Matrix
-rownames(ldaOut.topics) <- 1:nrow(ldaOut.topics)
-ldaOut.topics
-
-#Get top term in every topic
-ldaOut.terms <- as.data.frame(terms(ldaOut,15))
-ldaOut.terms
-
-topicProbabilities <- as.data.frame(ldaOut@gamma)
+#Define LDA parameters : 
+control <- list(iter = 500)
+ldaOut <-LDA(travel_dtm,10, method="Gibbs",control=control)
 ```
 
+```{r}
+#Topic of every document in our Document Term Matrix
+ldaOut.topics <- as.data.frame(topics(ldaOut))
+colnames(ldaOut.topics) <- "topic"
+ldaOut.topics
+```
+
+```{r}
+#Get top K term probability in every topic
+K <- 5
+ldaOut.terms <- as.data.frame(terms(ldaOut,K))
+colnames(ldaOut.terms) <- 1:ncol(ldaOut.terms)
+ldaOut.terms <- as.data.frame(t(ldaOut.terms))
+ldaOut.terms
+```
+
+```{r}
+#Topic probability distribution
+topicProbabilities <- as.data.frame(ldaOut@gamma)
+topicProbabilities
+```
+
+```{r}
+#Merge 
+cols <- colnames(ldaOut.terms)
+ldaOut.terms$tags <- apply(ldaOut.terms[ , cols ] , 1 , paste , collapse = " " )
+ldaOut.terms$topic <- 1:nrow(ldaOut.terms)
+ldaOut.terms
+```
+
+```{r}
+travel_tags <- inner_join(ldaOut.topics,ldaOut.terms,by="topic")
+travel_tags <- as.data.frame(travel_tags$tags)
+travel_tags$id <- 1:nrow(travel_tags)
+colnames(travel_tags) <- c("tags","id")
+travel_tags
+```
 ##### Generate TfIdf matrix
 
 We will now generate the **tfidf** matrix to reflect how important a word is to a document in the corpus. The **tfidf** is defined as the product of two statistics, term frequency and inverse document frequency.
