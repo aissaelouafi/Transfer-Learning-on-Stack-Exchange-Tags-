@@ -33,14 +33,14 @@ library(devtools)
 
 For memory issue (laptop with only 4Gb of RAM) I will analyze only first 1000 observations of each topic, it's about only <b>~10%</b> of real data ! Kaggle provide also a test dataset with 81926 observations talking about physics. Each dataframe contains 4 colmuns (id, title, content and tags column for the train data).
 ```{r}
-biology =  read.csv("../biology.csv",nrows =1000)
-travel = read.csv("../travel.csv",nrows=2000) 
-robotic = read.csv("../robotics.csv",nrows=1000)
-cooking = read.csv("../cooking.csv",nrows=1000)
-crypto = read.csv("../crypto.csv",nrows=1000)
-diy = read.csv("../diy.csv",nrows=1000)
-test = read.csv("../test.csv")
-sample_submission = read.csv("../sample_submission.csv",nrows=1000)
+biology =  read.csv("./biology.csv",nrows =1000)
+travel = read.csv("./travel.csv",nrows=2000) 
+robotic = read.csv("./robotics.csv",nrows=1000)
+cooking = read.csv("./cooking.csv",nrows=1000)
+crypto = read.csv("./crypto.csv",nrows=1000)
+diy = read.csv("./diy.csv",nrows=1000)
+test = read.csv("./test.csv")
+sample_submission = read.csv("./sample_submission.csv",nrows=1000)
 ```
 #### Explore data
 
@@ -162,16 +162,16 @@ We can see that we have many common word between the word title cloud word and t
 Describe LDA and the main goal of this approach (define topic and word distribution ! )
 
 ```{r}
-travel_corpus <- generateCorpus(travel$content)
-travel_dtm <- DocumentTermMatrix(travel_corpus)
-travel_dtm
+test_corpus <- generateCorpus(test$content)
+test_corpus <- DocumentTermMatrix(test_corpus)
+test_corpus
 ```
 
 We will apply the LDA using Gibbs sampling ... 
 ```{r}
 #Define LDA parameters : 
 control <- list(iter = 500)
-ldaOut <-LDA(travel_dtm,10, method="Gibbs",control=control)
+ldaOut <-LDA(test_corpus,30, method="Gibbs",control=control)
 ```
 
 ```{r}
@@ -209,7 +209,11 @@ travel_tags <- inner_join(ldaOut.topics,ldaOut.terms,by="topic")
 travel_tags <- as.data.frame(travel_tags$tags)
 travel_tags$id <- 1:nrow(travel_tags)
 colnames(travel_tags) <- c("tags","id")
+travel_tags <- travel_tags[,c("id","tags")]
 travel_tags
+```
+```{r}
+write.csv(travel_tags, file = "submission.csv",row.names = FALSE)
 ```
 ##### Generate TfIdf matrix
 
