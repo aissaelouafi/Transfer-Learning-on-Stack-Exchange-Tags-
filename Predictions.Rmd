@@ -34,19 +34,20 @@ library(devtools)
 For memory issue (laptop with only 4Gb of RAM) I will analyze only first 1000 observations of each topic, it's about only <b>~10%</b> of real data ! Kaggle provide also a test dataset with 81926 observations talking about physics. Each dataframe contains 4 colmuns (id, title, content and tags column for the train data).
 ```{r}
 biology =  read.csv("./biology.csv",nrows =1000)
-travel = read.csv("./travel.csv",nrows=2000) 
+travel = read.csv("./travel.csv") 
 robotic = read.csv("./robotics.csv",nrows=1000)
 cooking = read.csv("./cooking.csv",nrows=1000)
 crypto = read.csv("./crypto.csv",nrows=1000)
 diy = read.csv("./diy.csv",nrows=1000)
 test = read.csv("./test.csv")
-sample_submission = read.csv("./sample_submission.csv",nrows=1000)
+sample_submission = read.csv("./sample_submission.csv")
 ```
 #### Explore data
 
 Lets explore the train dataset of multiple topics ! 
 
 ```{r}
+
 sc <- spark_connect(master="local")
 travel[1:5,]
 ```
@@ -119,8 +120,8 @@ generateCorpus <- function(df){
   corpus <- tm_map(corpus,removePunctuation)
   corpus <- tm_map(corpus,removeNumbers)
   corpus <- tm_map(corpus,tolower)
-  corpus <- tm_map(corpus, removeWords, c("can", "get","best","good"))   
   corpus <- tm_map(corpus,removeWords,stopwords("english"))
+  corpus <- tm_map(corpus,removeWords,stopwords("SMART"))
   corpus <- tm_map(corpus, stripWhitespace) 
   corpus <- tm_map(corpus, PlainTextDocument)
   return(corpus)
@@ -171,7 +172,7 @@ We will apply the LDA using Gibbs sampling ...
 ```{r}
 #Define LDA parameters : 
 control <- list(iter = 500)
-ldaOut <-LDA(test_corpus,30, method="Gibbs",control=control)
+ldaOut <-LDA(test_corpus,50, method="Gibbs",control=control)
 ```
 
 ```{r}
@@ -211,9 +212,8 @@ travel_tags$id <- 1:nrow(travel_tags)
 colnames(travel_tags) <- c("tags","id")
 travel_tags <- travel_tags[,c("id","tags")]
 travel_tags
-```
-```{r}
-write.csv(travel_tags, file = "submission.csv",row.names = FALSE)
+sample_submission$tags <- travel_tags$tags
+write.csv(sample_submission, file = "submission.csv",row.names = FALSE)
 ```
 ##### Generate TfIdf matrix
 
@@ -259,3 +259,14 @@ plot_ly(x = nrow(eig.dataframe):1, y = eig.dataframe$cumvariance,type="bar",name
 sum(eig.dataframe$variance)
 ```
 We can see that the first 50  PCs contains only <b>11.52 %</b> of total variance, we lose <b>88.48 %</b> of data informations, so we can't take only the first 50 PCs.
+
+
+#### Naive Bayes classifier 
+
+```{r}
+model <- naiveBayes(as.matrix(tfidf),as.factor(biology$tags))
+tfidf_test <- rollup(tfidf_test, 2, na.rm=TRUE, FUN = sum)
+prediction <- predict(model,as.matrix(tfidf_test))
+colnames(prediction) <- c("tags")
+prediction <- as.data.frame(prediction)
+```
